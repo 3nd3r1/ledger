@@ -1,0 +1,7 @@
+-r requirements.txt
+mypy
+pytest-cov
+pytest
+pytest-asyncio
+types-PyYAML
+ruff
