@@ -1,6 +1,6 @@
 import logging
 
-from preparation import read_data
+from preparation import create_texts, read_data
 
 
 def main():
@@ -9,7 +9,9 @@ def main():
     )
 
     df = read_data("data/superstore.csv")
-    print(df)
+    texts = create_texts(df)
+
+    print(texts)
 
 
 if __name__ == "__main__":
