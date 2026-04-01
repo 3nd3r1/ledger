@@ -16,6 +16,7 @@ def main():
     chunks = chunk_texts(texts)
 
     store = VectorStore()
+    store.add_chunks(chunks)
 
 
 if __name__ == "__main__":

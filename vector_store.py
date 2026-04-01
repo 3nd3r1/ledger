@@ -1,5 +1,8 @@
-import chromadb
+import logging
+
 from chromadb.utils import embedding_functions
+
+import chromadb
 
 
 class VectorStore:
@@ -14,3 +17,14 @@ class VectorStore:
             name="superstore",
             embedding_function=self._embedding_function,  # type: ignore
         )
+
+    def add_chunks(self, chunks: list[str]):
+        batch_size = 100
+        for i in range(0, len(chunks), batch_size):
+            batch_chunks = chunks[i : i + batch_size]
+            ids = [f"doc_{i + j}" for j in range(i, i + len(batch_chunks))]
+            self._collection.add(
+                ids=ids,
+                documents=batch_chunks,
+            )
+        logging.info(f"Added {len(chunks)} chunks to the vector store.")
