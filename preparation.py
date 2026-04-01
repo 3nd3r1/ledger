@@ -9,5 +9,17 @@ def read_data(path: str) -> pd.DataFrame:
     return df
 
 
+def row_to_text(row: pd.Series) -> str:
+    return (
+        f"Order {row['Order Id']} on {row['Order Date']}:"
+        f"Customer {row['Customer Name']} from {row['City']}, {row['State']}, {row['Region']} "
+        f"ordered {row['Quantity']} '{row['Product Name']}' "
+        f"with ship mode {row['Ship Mode']}, generating {row['Sales']} in sales and {row['Profit']} in profit."
+    )
+
+
 def create_texts(df: pd.DataFrame) -> list[str]:
-    pass
+    texts = []
+    texts.extend(row_to_text(row) for _, row in df.iterrows())
+
+    return texts
