@@ -73,3 +73,22 @@ def create_texts(df: pd.DataFrame) -> list[str]:
     texts += create_region_texts(df)
 
     return texts
+
+
+def chunk_texts(texts: list[str], chunk_size: int = 500) -> list[str]:
+    chunked_texts = []
+    for text in texts:
+        if len(text) <= chunk_size:
+            chunked_texts.append(text)
+        else:
+            current = []
+            current_length = 0
+            for word in text.split():
+                if current_length + len(word) + 1 > chunk_size:
+                    chunked_texts.append(" ".join(current))
+                current.append(word)
+                current_length += len(word) + 1
+            if current:
+                chunked_texts.append(" ".join(current))
+
+    return chunked_texts
