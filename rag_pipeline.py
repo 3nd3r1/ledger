@@ -1,3 +1,4 @@
+from langchain_core.messages import AIMessage
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_ollama import OllamaLLM
@@ -47,4 +48,5 @@ class RAGPipeline:
 
         context = "\n\n".join(f"{doc['text']}" for doc in docs)
         prompt = RAG_TEMPLATE.format(context=context, question=question)
-        return self._llm.invoke(prompt)  # type: ignore
+        result = self._llm.invoke(prompt)
+        return str(result.content) if isinstance(result, AIMessage) else result
