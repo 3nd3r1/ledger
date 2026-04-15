@@ -4,4 +4,5 @@ chromadb
 sentence_transformers
 argparse
 langchain
+langchain-core
 langchain-ollama
