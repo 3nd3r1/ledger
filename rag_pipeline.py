@@ -19,9 +19,7 @@ RAG_TEMPLATE = PromptTemplate.from_template(
 
 
 class RAGPipeline:
-    def __init__(
-        self, vector_store: VectorStore, model: str = "mistral", top_k: int = 10
-    ):
+    def __init__(self, vector_store: VectorStore, model: str = "phi3", top_k: int = 10):
         self._store = vector_store
         self._llm = OllamaLLM(model=model)
         self._top_k = top_k
