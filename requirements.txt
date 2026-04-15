@@ -3,3 +3,5 @@ numpy
 chromadb
 sentence_transformers
 argparse
+langchain
+langchain-ollama
