@@ -6,3 +6,5 @@ argparse
 langchain
 langchain-core
 langchain-ollama
+langchain-groq
+python-dotenv
