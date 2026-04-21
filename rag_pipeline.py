@@ -1,9 +1,6 @@
-from langchain_core.messages import AIMessage
 from langchain_core.prompts import PromptTemplate
-from langchain_groq import ChatGroq
-from langchain_ollama import OllamaLLM
 
-from config import config
+from llm_provider import create_llm, invoke_llm
 from vector_store import VectorStore
 
 
@@ -30,13 +27,7 @@ class RAGPipeline:
         self._store = vector_store
         self._top_k = top_k
 
-        if config.llm_provider == "groq":
-            if not config.groq_api_key:
-                raise ValueError("GROQ_API_KEY must be set for Groq LLM provider.")
-
-            self._llm = ChatGroq(model=config.llm_model, api_key=config.groq_api_key)
-        else:
-            self._llm = OllamaLLM(model=config.llm_model)
+        self._llm = create_llm()
 
     def retrieve(self, query: str) -> list[dict]:
         return self._store.search(query, n_results=self._top_k)
@@ -48,5 +39,4 @@ class RAGPipeline:
 
         context = "\n\n".join(f"{doc['text']}" for doc in docs)
         prompt = RAG_TEMPLATE.format(context=context, question=question)
-        result = self._llm.invoke(prompt)
-        return str(result.content) if isinstance(result, AIMessage) else result
+        return invoke_llm(self._llm, prompt)
