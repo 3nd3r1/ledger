@@ -1,6 +1,16 @@
+import re
+
+from rich import box
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
+
 from llm_provider import create_llm, invoke_llm
 from rag_pipeline import RAGPipeline
 from vector_store import VectorStore
+
+
+console = Console()
 
 
 TEST_CASES = [
@@ -66,31 +76,80 @@ EXPLANATION: <one sentence>
 """
 
 
-def judge(question: str, truth: str, rag_answer: str) -> str:
+def judge(question: str, truth: str, rag_answer: str) -> tuple[int, str]:
     llm = create_llm()
     prompt = JUDGE_PROMPT.format(
         question=question,
         truth=truth,
         rag_answer=rag_answer,
     )
+    text = invoke_llm(llm, prompt)
 
-    return invoke_llm(llm, prompt)
+    score_match = re.search(r"SCORE:\s*([1-5])", text)
+    explanation_match = re.search(r"EXPLANATION:\s*(.+)", text)
+
+    score = int(score_match.group(1)) if score_match else 0
+    explanation = (
+        explanation_match.group(1).strip() if explanation_match else text.strip()
+    )
+
+    return score, explanation
 
 
 def run_tests():
     store = VectorStore()
     rag = RAGPipeline(store)
 
-    for i, tc in enumerate(TEST_CASES, 1):
-        print(f"Test case {i}/{len(TEST_CASES)}")
-        print(f"Question: {tc['question']}")
-        print(f"Truth: {tc['truth']}")
+    results = []
 
-        rag_answer = rag.query(tc["question"])
-        print(f"RAG: {str(rag_answer)}")
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task("Running tests...", total=len(TEST_CASES))
 
-        result = judge(
-            question=tc["question"], truth=tc["truth"], rag_answer=str(rag_answer)
+        for i, tc in enumerate(TEST_CASES, 1):
+            progress.update(task, description=f"{i}/{len(TEST_CASES)} {tc['question']}")
+
+            rag_answer = rag.query(tc["question"])
+            score, explanation = judge(
+                question=tc["question"],
+                truth=tc["truth"],
+                rag_answer=str(rag_answer),
+            )
+            results.append(
+                {
+                    "tc": tc,
+                    "rag_answer": rag_answer,
+                    "score": score,
+                    "explanation": explanation,
+                }
+            )
+            progress.advance(task)
+
+    table = Table(box=box.ROUNDED, show_lines=True, title="Results")
+    table.add_column("#", style="dim", width=3, justify="right")
+    table.add_column("Question", min_width=36)
+    table.add_column("RAG Answer", min_width=36)
+    table.add_column("Score", width=7, justify="center")
+    table.add_column("Explanation", min_width=36)
+
+    for i, r in enumerate(results, 1):
+        score = r["score"]
+        color = "green" if score >= 4 else "yellow" if score >= 2 else "red"
+        score_str = f"[{color}]{score}/5[/{color}]" if score else ""
+        table.add_row(
+            str(i), r["tc"]["question"], r["rag_answer"], score_str, r["explanation"]
         )
-        print(f"Judge: {result}")
-        print()
+
+    console.print()
+    console.print(table)
+
+    scored = [r["score"] for r in results if r["score"] > 0]
+    if scored:
+        avg = sum(scored) / len(scored)
+        console.print(
+            f"\nAverage score: [blue]{avg:.2f} / 5.00[/blue]  ({len(scored)}/{len(results)} judged)\n"
+        )

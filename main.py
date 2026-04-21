@@ -70,7 +70,7 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.WARNING,
+        level=logging.DEBUG if args.debug else logging.ERROR,
     )
 
     if args.command == "prepare":
