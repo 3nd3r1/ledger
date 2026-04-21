@@ -19,6 +19,9 @@ python main.py chat
 
 # Enable debug logging
 python main.py --debug chat
+
+# Run testing suite
+python main.py test
 ```
 
 ## Documentation
