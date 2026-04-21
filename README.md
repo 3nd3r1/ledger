@@ -21,6 +21,10 @@ python main.py chat
 python main.py --debug chat
 ```
 
+## Documentation
+
+Read the technical report here: [./docs/technical-report.md](./docs/technical-report.md).
+
 ## Providers
 
 Ledger supports [Ollama](https://ollama.com) or [Groq](https://groq.com).
