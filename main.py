@@ -3,6 +3,7 @@ import logging
 
 from preparation import chunk_texts, create_texts, read_data
 from rag_pipeline import RAGPipeline
+from test_queries import run_tests
 from vector_store import VectorStore
 
 
@@ -47,8 +48,12 @@ def chat():
         print(f"Answer: {answer}\n")
 
 
+def test():
+    run_tests()
+
+
 def main():
-    parser = argparse.ArgumentParser(description="LLM-RAG Project CLI")
+    parser = argparse.ArgumentParser(description="Ledger CLI")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     subparser = parser.add_subparsers(dest="command", required=True)
@@ -59,6 +64,8 @@ def main():
     search_parser.add_argument("query", type=str, help="The search query")
 
     subparser.add_parser("chat", help="Start an interactive chat session")
+
+    subparser.add_parser("test", help="Run evaluation queries with LLM-as-judge")
 
     args = parser.parse_args()
 
@@ -72,6 +79,8 @@ def main():
         chat()
     elif args.command == "search":
         search(args.query)
+    elif args.command == "test":
+        test()
 
 
 if __name__ == "__main__":
