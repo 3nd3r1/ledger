@@ -8,6 +8,10 @@ TEST_CASES = [
         "question": "Which region has the best sales performance?",
         "truth": "The top sales regions are: 1. West $725,457.82, 2. East $678,781.24, 3. Central $501,239.89",
     },
+    {
+        "question": "Which product category generates the most revenue?",
+        "truth": "Technology generates the most revenue at $836,154.03, followed by Furniture $741,999.80 and Office Supplies $719,047.03",
+    },
 ]
 
 
@@ -53,3 +57,4 @@ def run_tests():
             question=tc["question"], truth=tc["truth"], rag_answer=str(rag_answer)
         )
         print(f"Judge: {result}")
+        print()
