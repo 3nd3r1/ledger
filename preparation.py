@@ -12,7 +12,7 @@ def create_row_text(row: pd.Series) -> str:
         f"Order {row['Order ID']} on {row['Order Date']}: "
         f"Customer {row['Customer Name']} from {row['City']}, {row['State']}, {row['Region']} "
         f"ordered {row['Quantity']} '{row['Product Name']}' "
-        f"with ship mode {row['Ship Mode']}, generating {row['Sales']} in sales and {row['Profit']} in profit."
+        f"with ship mode {row['Ship Mode']}, generating ${row['Sales']:.2f} in sales and ${row['Profit']:.2f} in profit."
     )
 
 
@@ -23,9 +23,9 @@ def create_row_texts(df: pd.DataFrame) -> list[str]:
 def create_month_text(row: pd.Series) -> str:
     return (
         f"Monthly orders for {row['Order Date']}: "
-        f"Total sales {row['total_sales']}, "
+        f"Total sales ${row['total_sales']:.2f}, "
         f"Total orders {row['total_orders']}, "
-        f"Total profit {row['total_profit']}."
+        f"Total profit ${row['total_profit']:.2f}."
     )
 
 
@@ -46,9 +46,9 @@ def create_month_texts(df: pd.DataFrame) -> list[str]:
 def create_region_text(row: pd.Series) -> str:
     return (
         f"Regional orders for {row['Region']}: "
-        f"Total sales {row['total_sales']}, "
+        f"Total sales ${row['total_sales']:.2f}, "
         f"Total orders {row['total_orders']}, "
-        f"Total profit {row['total_profit']}."
+        f"Total profit ${row['total_profit']:.2f}."
     )
 
 
@@ -69,8 +69,8 @@ def create_region_texts(df: pd.DataFrame) -> list[str]:
 def create_category_text(row: pd.Series) -> str:
     return (
         f"Category summary for {row['Category']}: "
-        f"Total sales {row['total_sales']:.2f}, "
-        f"Total profit {row['total_profit']:.2f}."
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total profit ${row['total_profit']:.2f}."
     )
 
 
