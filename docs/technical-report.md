@@ -127,6 +127,8 @@ RAG_TEMPLATE = PromptTemplate.from_template(
    - I uses Groq
 5. Using a jupyter notebook or CLi executable
    - I went with a CLI executable since I am not fond of Jupyter notebooks.
+6. Too small top_k to get state and city chunks
+   - Increase top_k to 20 so all queries fit
 
 ## AI Usage
 
