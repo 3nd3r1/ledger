@@ -2,6 +2,9 @@ import argparse
 import logging
 
 import transformers
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.rule import Rule
 
 from preparation import chunk_texts, create_texts, read_data
 from rag_pipeline import RAGPipeline
@@ -29,25 +32,31 @@ def search(query: str):
 
 
 def chat():
+    console = Console()
     store = VectorStore()
     rag = RAGPipeline(store)
 
+    console.print("\n[bold]Ledger[/bold] - type [dim]/exit[/dim] to exit\n")
+
     while True:
         try:
-            query = input("Enter your question (or '/exit'): ")
+            query = console.input("[bold cyan]You:[/bold cyan] ")
         except KeyboardInterrupt:
-            print("\nExiting...")
+            console.print("\n[dim]Exiting...[/dim]")
             break
 
         if query.lower() == "/exit":
-            print("\nExiting...")
+            console.print("[dim]Exiting...[/dim]")
             break
 
         if not query:
             continue
 
         answer = rag.query(query)
-        print(f"Answer: {answer}\n")
+        console.print(Rule(style="dim"))
+        console.print(Markdown(answer))
+        console.print(Rule(style="dim"))
+        console.print()
 
 
 def test():
