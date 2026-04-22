@@ -4,6 +4,7 @@ from chromadb.utils import embedding_functions
 
 import chromadb
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,6 +20,14 @@ class VectorStore:
             name="superstore",
             embedding_function=self._embedding_function,  # type: ignore
         )
+
+    def clear(self):
+        self._client.delete_collection("superstore")
+        self._collection = self._client.get_or_create_collection(
+            name="superstore",
+            embedding_function=self._embedding_function,  # type: ignore
+        )
+        logger.info("Cleared the vector store.")
 
     def add_chunks(self, chunks: list[str]):
         batch_size = 100
