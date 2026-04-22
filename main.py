@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+import transformers
+
 from preparation import chunk_texts, create_texts, read_data
 from rag_pipeline import RAGPipeline
 from test_queries import run_tests
@@ -70,8 +72,12 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(
-        level=logging.DEBUG if args.debug else logging.ERROR,
+        level=logging.DEBUG if args.debug else logging.WARNING,
     )
+
+    if not args.debug:
+        transformers.logging.set_verbosity_error()
+        transformers.logging.disable_progress_bar()
 
     if args.command == "prepare":
         prepare()
