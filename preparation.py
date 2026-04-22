@@ -83,6 +83,56 @@ def create_region_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     return [create_region_text(row) for _, row in region_rows.iterrows()]
 
 
+def create_state_text(row: pd.Series) -> tuple[str, dict]:
+    text = (
+        f"State summary for {row['State']}: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total profit ${row['total_profit']:.2f}."
+    )
+    metadata = {"type": "state_summary", "state": row["State"]}
+    return text, metadata
+
+
+def create_state_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
+    state_rows = (
+        df.groupby("State")
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_state_text(row) for _, row in state_rows.iterrows()]
+
+
+def create_city_text(row: pd.Series) -> tuple[str, dict]:
+    text = (
+        f"City summary for {row['City']}, {row['State']}: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total profit ${row['total_profit']:.2f}."
+    )
+    metadata = {"type": "city_summary", "city": row["City"], "state": row["State"]}
+    return text, metadata
+
+
+def create_city_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
+    city_rows = (
+        df.groupby(["City", "State"])
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_city_text(row) for _, row in city_rows.iterrows()]
+
+
 def create_category_text(row: pd.Series) -> tuple[str, dict]:
     text = (
         f"Category summary for {row['Category']}: "
@@ -168,6 +218,8 @@ def create_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     chunks += create_row_texts(df)
     chunks += create_month_texts(df)
     chunks += create_region_texts(df)
+    chunks += create_state_texts(df)
+    chunks += create_city_texts(df)
     chunks += create_category_texts(df)
     chunks += create_subcategory_texts(df)
     chunks += create_product_texts(df)
