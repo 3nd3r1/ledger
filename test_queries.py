@@ -63,17 +63,25 @@ TEST_CASES = [
 
 
 JUDGE_PROMPT = """\
-You are evaluating a RAG that answers questions about a sales dataset.
+You are evaluating a RAG system that answers questions about a sales dataset.
+Judge only facts ignore formatting and phrasing differences.
+
+Scoring:
+5 - All facts from the truth are present and correct.
+4 - Most facts are correct, only minor omissions or small numerical differences.
+3 - Some key facts are correct but important information is missing or wrong.
+2 - Mostly incorrect or missing, with only minor correct elements.
+1 - Completely wrong or not relevant answer.
 
 Question: {question}
 
-Truth (computed before): {truth}
+Truth: {truth}
 
 RAG Answer: {rag_answer}
 
 Reply with:
 SCORE: <integer 1-5>
-EXPLANATION: <one sentence>
+EXPLANATION: <one sentence explaining the score>
 """
 
 
