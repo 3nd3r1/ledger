@@ -1,3 +1,5 @@
+import calendar
+
 import pandas as pd
 
 
@@ -31,7 +33,7 @@ def create_row_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
 
 def create_month_text(row: pd.Series) -> tuple[str, dict]:
     text = (
-        f"Monthly orders for {row['Order Date']}: "
+        f"Monthly orders for {calendar.month_name[row['Order Date'].month]} {row['Order Date'].year}: "
         f"Total sales ${row['total_sales']:.2f}, "
         f"Total orders {row['total_orders']}, "
         f"Total profit ${row['total_profit']:.2f}."
@@ -56,6 +58,32 @@ def create_month_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     )
 
     return [create_month_text(row) for _, row in month_rows.iterrows()]
+
+
+def create_month_aggregate_text(row: pd.Series) -> tuple[str, dict]:
+    month_name = calendar.month_name[int(row["month"])]
+    text = (
+        f"Aggregate orders for {month_name} across all years: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total profit ${row['total_profit']:.2f}."
+    )
+    metadata = {"type": "month_aggregate_summary", "month": int(row["month"])}
+    return text, metadata
+
+
+def create_month_aggregate_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
+    month_rows = (
+        df.groupby(df["Order Date"].dt.month.rename("month"))
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_month_aggregate_text(row) for _, row in month_rows.iterrows()]
 
 
 def create_region_text(row: pd.Series) -> tuple[str, dict]:
@@ -279,6 +307,7 @@ def create_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     chunks: list[tuple[str, dict]] = []
     chunks += create_row_texts(df)
     chunks += create_month_texts(df)
+    chunks += create_month_aggregate_texts(df)
     chunks += create_year_texts(df)
     chunks += create_year_category_texts(df)
     chunks += create_region_texts(df)
