@@ -26,7 +26,7 @@ class RAGPipeline:
     def __init__(
         self,
         vector_store: VectorStore,
-        top_k: int = 10,
+        top_k: int = 20,
     ):
         self._store = vector_store
         self._top_k = top_k
