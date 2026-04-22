@@ -7,7 +7,7 @@
 
 Commit: https://github.com/3nd3r1/ledger/commit/c8903ea04f53b93f885123cf5f9104801cad145
 
-Result: [test-reports/report1.md](./test-reports/report1.md)
+Result: [evaluation-reports/report1.md](./evaluation-reports/report1.md)
 
 ## Version 2
 
@@ -18,7 +18,7 @@ Result: [test-reports/report1.md](./test-reports/report1.md)
 
 Commit: https://github.com/3nd3r1/ledger/commit/86aa0fb6ea532154bd1576cec096c170f0a62984
 
-Result: [test-reports/report2.md](./test-reports/report2.md)
+Result: [evaluation-reports/report2.md](./evaluation-reports/report2.md)
 
 ## Version 3
 
@@ -29,4 +29,4 @@ Result: [test-reports/report2.md](./test-reports/report2.md)
 
 Commit: https://github.com/3nd3r1/ledger/commit/e0d9cb11c7b1231c92a03903dfb1dc056b9bf8bc
 
-Result: [test-reports/report3.md](./test-reports/report3.md)
+Result: [evaluation-reports/report3.md](./evaluation-reports/report3.md)
