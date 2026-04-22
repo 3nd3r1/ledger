@@ -4,6 +4,7 @@ import pandas as pd
 def read_data(path: str) -> pd.DataFrame:
     df = pd.read_csv(path, encoding="latin-1")
     df["Order Date"] = pd.to_datetime(df["Order Date"])
+    df["is_discounted"] = df["Discount"] > 0
     return df
 
 
@@ -87,12 +88,63 @@ def create_category_texts(df: pd.DataFrame) -> list[str]:
     return [create_category_text(row) for _, row in category_rows.iterrows()]
 
 
+def create_subcategory_text(row: pd.Series) -> str:
+    return (
+        f"Sub-Category summary for {row['Sub-Category']}: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total profit ${row['total_profit']:.2f}."
+    )
+
+
+def create_subcategory_texts(df: pd.DataFrame) -> list[str]:
+    subcategory_rows = (
+        df.groupby("Sub-Category")
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_subcategory_text(row) for _, row in subcategory_rows.iterrows()]
+
+
+def create_product_text(row: pd.Series) -> str:
+    return (
+        f"Product summary for {row['product_name']} ({row['Product ID']}): "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total profit ${row['total_profit']:.2f}, "
+        f"Total quantity sold {row['total_quantity']}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total discounted orders {row['total_discounted_orders']}."
+    )
+
+
+def create_product_texts(df: pd.DataFrame) -> list[str]:
+    product_rows = (
+        df.groupby("Product ID")
+        .agg(
+            product_name=("Product Name", "first"),
+            total_sales=("Sales", "sum"),
+            total_profit=("Profit", "sum"),
+            total_quantity=("Quantity", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_discounted_orders=("is_discounted", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_product_text(row) for _, row in product_rows.iterrows()]
+
+
 def create_texts(df: pd.DataFrame) -> list[str]:
     texts = []
     texts += create_row_texts(df)
     texts += create_month_texts(df)
     texts += create_region_texts(df)
     texts += create_category_texts(df)
+    texts += create_subcategory_texts(df)
+    texts += create_product_texts(df)
 
     return texts
 
