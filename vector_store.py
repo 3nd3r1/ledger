@@ -4,6 +4,8 @@ from chromadb.utils import embedding_functions
 
 import chromadb
 
+logger = logging.getLogger(__name__)
+
 
 class VectorStore:
     def __init__(self):
@@ -27,9 +29,10 @@ class VectorStore:
                 ids=ids,
                 documents=batch_chunks,
             )
-        logging.info(f"Added {len(chunks)} chunks to the vector store.")
+        logger.info(f"Added {len(chunks)} chunks to the vector store.")
 
     def search(self, query: str, n_results: int = 10) -> list[dict]:
+        logger.debug(f"Searching for '{query}' (top {n_results})")
         results = self._collection.query(
             query_texts=[query],
             n_results=n_results,

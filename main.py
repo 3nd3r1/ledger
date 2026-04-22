@@ -3,6 +3,7 @@ import logging
 
 import transformers
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.markdown import Markdown
 from rich.rule import Rule
 
@@ -13,27 +14,49 @@ from vector_store import VectorStore
 
 
 def prepare():
-    df = read_data("data/superstore.csv")
+    console = Console()
 
-    texts = create_texts(df)
+    with console.status("Reading data..."):
+        df = read_data("data/superstore.csv")
+    console.print(f"[green]✓[/green] Loaded {len(df)} rows")
 
-    chunks = chunk_texts(texts)
+    with console.status("Creating texts..."):
+        texts = create_texts(df)
+    console.print(f"[green]✓[/green] Created {len(texts)} texts")
 
-    store = VectorStore()
-    store.add_chunks(chunks)
+    with console.status("Chunking texts..."):
+        chunks = chunk_texts(texts)
+    console.print(f"[green]✓[/green] Chunked into {len(chunks)} chunks")
+
+    with console.status("Storing embeddings..."):
+        store = VectorStore()
+        store.add_chunks(chunks)
+    console.print(f"[green]✓[/green] Stored {len(chunks)} chunks in vector store")
 
 
 def search(query: str):
-    store = VectorStore()
+    console = Console()
+
+    with console.status("Loading vector store..."):
+        store = VectorStore()
+    console.print("[green]✓[/green] Loaded vector store")
+
     results = store.search(query)
 
+    console.print(f"\n[bold]Search results for:[/bold] {query}\n")
+    console.print(Rule(style="dim"))
     for result in results:
-        print(result)
+        console.print(Markdown(result["text"]))
+    console.print(Rule(style="dim"))
 
 
 def chat():
     console = Console()
-    store = VectorStore()
+
+    with console.status("Loading vector store..."):
+        store = VectorStore()
+    console.print("[green]✓[/green] Loaded vector store")
+
     rag = RAGPipeline(store)
 
     console.print("\n[bold]Ledger[/bold] - type [dim]/exit[/dim] to exit\n")
@@ -82,6 +105,7 @@ def main():
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.WARNING,
+        handlers=[RichHandler(markup=True, rich_tracebacks=True)],
     )
 
     if not args.debug:

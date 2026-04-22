@@ -1,3 +1,5 @@
+import logging
+
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.messages import AIMessage
 from langchain_groq import ChatGroq
@@ -5,12 +7,16 @@ from langchain_ollama import OllamaLLM
 
 from config import config
 
+logger = logging.getLogger(__name__)
+
 
 def create_llm(
     model: str | None = None, provider: str | None = None
 ) -> BaseLanguageModel:
     provider = provider or config.llm_provider
     model = model or config.llm_model
+
+    logger.info(f"Using {provider} / {model}")
 
     if provider == "groq":
         if not config.groq_api_key:

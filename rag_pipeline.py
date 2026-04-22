@@ -1,7 +1,11 @@
+import logging
+
 from langchain_core.prompts import PromptTemplate
 
 from llm_provider import create_llm, invoke_llm
 from vector_store import VectorStore
+
+logger = logging.getLogger(__name__)
 
 
 SYSTEM_PROMPT = """You are a data analyst assistant.
@@ -30,7 +34,9 @@ class RAGPipeline:
         self._llm = create_llm()
 
     def retrieve(self, query: str) -> list[dict]:
-        return self._store.search(query, n_results=self._top_k)
+        docs = self._store.search(query, n_results=self._top_k)
+        logger.debug(f"Retrieved {len(docs)} docs, distances: {[round(d['distance'], 3) for d in docs]}")
+        return docs
 
     def query(self, question: str) -> str:
         docs = self.retrieve(question)
@@ -39,4 +45,5 @@ class RAGPipeline:
 
         context = "\n\n".join(f"{doc['text']}" for doc in docs)
         prompt = RAG_TEMPLATE.format(context=context, question=question)
+        logger.debug("Sending prompt to LLM")
         return invoke_llm(self._llm, prompt)
