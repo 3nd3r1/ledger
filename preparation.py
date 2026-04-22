@@ -217,10 +217,70 @@ def create_product_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     return [create_product_text(row) for _, row in product_rows.iterrows()]
 
 
+def create_year_text(row: pd.Series) -> tuple[str, dict]:
+    profit_margin = (
+        (row["total_profit"] / row["total_sales"] * 100) if row["total_sales"] else 0
+    )
+    text = (
+        f"Annual summary for {row['year']}: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total profit ${row['total_profit']:.2f}, "
+        f"Profit margin {profit_margin:.2f}%."
+    )
+    metadata = {"type": "year_summary", "year": int(row["year"])}
+    return text, metadata
+
+
+def create_year_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
+    year_rows = (
+        df.groupby(df["Order Date"].dt.year.rename("year"))
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_year_text(row) for _, row in year_rows.iterrows()]
+
+
+def create_year_category_text(row: pd.Series) -> tuple[str, dict]:
+    text = (
+        f"Annual summary for {row['year']} - {row['Category']}: "
+        f"Total sales ${row['total_sales']:.2f}, "
+        f"Total orders {row['total_orders']}, "
+        f"Total profit ${row['total_profit']:.2f}."
+    )
+    metadata = {
+        "type": "year_category_summary",
+        "year": int(row["year"]),
+        "category": row["Category"],
+    }
+    return text, metadata
+
+
+def create_year_category_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
+    year_category_rows = (
+        df.groupby([df["Order Date"].dt.year.rename("year"), "Category"])
+        .agg(
+            total_sales=("Sales", "sum"),
+            total_orders=("Order ID", "nunique"),
+            total_profit=("Profit", "sum"),
+        )
+        .reset_index()
+    )
+
+    return [create_year_category_text(row) for _, row in year_category_rows.iterrows()]
+
+
 def create_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     chunks: list[tuple[str, dict]] = []
     chunks += create_row_texts(df)
     chunks += create_month_texts(df)
+    chunks += create_year_texts(df)
+    chunks += create_year_category_texts(df)
     chunks += create_region_texts(df)
     chunks += create_state_texts(df)
     chunks += create_city_texts(df)
