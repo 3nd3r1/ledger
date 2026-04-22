@@ -41,15 +41,7 @@ In addition summaries are generated for monthly sales totals, category/sub-categ
 
 ## Embedding Model and Vector Database
 
-### ChromaDB
-
-ChromaDB was chosen for its simplicity.
-
-- In-process
-- No external servers
-- Persisted as local files in `chroma_db/`
-
-### all-MiniLM-L6-v2
+### Embedding (all-MiniLM-L6-v2)
 
 all-MiniLM-L6-v2 from sentence-transformers was selected as the embedding model.
 
@@ -57,8 +49,17 @@ all-MiniLM-L6-v2 from sentence-transformers was selected as the embedding model.
 - Lightweight (~80 MB)
 - CPU inference
 - ChromaDB has a built-in adapter that handles embedding automatically
+- The small dimensions and a bit lower quality wasn't an issue with the sample queries
 
 TODO: Something about metadata
+
+### ChromaDB
+
+ChromaDB was chosen for its simplicity.
+
+- In-process
+- No external servers
+- Persisted as local files in `chroma_db/`
 
 ## LLM Selection and Prompt Engineering
 
