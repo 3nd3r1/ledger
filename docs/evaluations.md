@@ -84,3 +84,18 @@ Result: [evaluation-reports/report4.md](./evaluation-reports/report4.md)
 
 Commit: https://github.com/3nd3r1/ledger/commit/1e533a00ef8dfd1227a2fc89f4fa09aa4f3b569f
 Result: [evaluation-reports/report5.md](./evaluation-reports/report5.md)
+
+## Version 6
+
+### Changes
+
+- Added keyword-based metadata routing to filter chunks by type per query
+
+### Issues
+
+- Seasonality query still partially wrong
+- Sub-category profit margin ranking incorrect
+- State and city retrieval still incomplete
+
+Commit: https://github.com/3nd3r1/ledger/commit/d8f549cfb0812fb3771c1e9a170457774011b8af
+Result: [evaluation-reports/report6.md](./evaluation-reports/report6.md)
