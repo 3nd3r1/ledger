@@ -41,11 +41,12 @@ class VectorStore:
             )
         logger.info(f"Added {len(chunks)} chunks to the vector store.")
 
-    def search(self, query: str, n_results: int = 10) -> list[dict]:
-        logger.debug(f"Searching for '{query}' (top {n_results})")
+    def search(self, query: str, n_results: int = 10, where: dict | None = None) -> list[dict]:
+        logger.debug(f"Searching for '{query}' (top {n_results}){f', filter: {where}' if where else ''}")
         results = self._collection.query(
             query_texts=[query],
             n_results=n_results,
+            where=where,
         )
 
         docs = []
