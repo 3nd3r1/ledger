@@ -5,7 +5,32 @@ from langchain_core.prompts import PromptTemplate
 from llm_provider import create_llm, invoke_llm
 from vector_store import VectorStore
 
+
 logger = logging.getLogger(__name__)
+
+
+TYPE_KEYWORDS: list[tuple[list[str], list[str]]] = [
+    (
+        ["trend", "over the year", "4-year", "four-year", "year-over-year"],
+        ["year_summary", "year_category_summary"],
+    ),
+    (["season", "which month", "monthly"], ["month_aggregate_summary"]),
+    (["discount"], ["subcategory_summary"]),
+    (["category"], ["category_summary"]),
+    (["sub-category", "subcategory"], ["subcategory_summary"]),
+    (["state"], ["state_summary"]),
+    (["city", "cities"], ["city_summary"]),
+    (["region"], ["region_summary"]),
+]
+
+
+def extract_types(query: str) -> list[str]:
+    q = query.lower()
+    result: list[str] = []
+    for keywords, chunk_types in TYPE_KEYWORDS:
+        if any(keyword in q for keyword in keywords):
+            result.extend(chunk_types)
+    return list(dict.fromkeys(result))
 
 
 SYSTEM_PROMPT = """You are a data analyst assistant.
@@ -34,8 +59,12 @@ class RAGPipeline:
         self._llm = create_llm()
 
     def retrieve(self, query: str) -> list[dict]:
-        docs = self._store.search(query, n_results=self._top_k)
-        logger.debug(f"Retrieved {len(docs)} docs, distances: {[round(d['distance'], 3) for d in docs]}")
+        types = extract_types(query)
+        where = {"type": {"$in": types}} if len(types) > 0 else None
+        docs = self._store.search(query, n_results=self._top_k, where=where)
+        logger.debug(
+            f"Retrieved {len(docs)} docs (route={types}), distances: {[round(d['distance'], 3) for d in docs]}"
+        )
         return docs
 
     def query(self, question: str) -> str:
