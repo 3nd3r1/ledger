@@ -185,10 +185,14 @@ def create_category_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
 
 
 def create_subcategory_text(row: pd.Series) -> tuple[str, dict]:
+    profit_margin = (
+        (row["total_profit"] / row["total_sales"] * 100) if row["total_sales"] else 0
+    )
     text = (
         f"Sub-Category summary for {row['Sub-Category']}: "
         f"Total sales ${row['total_sales']:.2f}, "
         f"Total profit ${row['total_profit']:.2f}, "
+        f"Profit margin {profit_margin:.2f}%, "
         f"Total orders {row['total_orders']}, "
         f"Total discounted orders {row['total_discounted_orders']}."
     )
