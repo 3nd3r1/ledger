@@ -118,7 +118,11 @@ def create_state_text(row: pd.Series) -> tuple[str, dict]:
         f"Total orders {row['total_orders']}, "
         f"Total profit ${row['total_profit']:.2f}."
     )
-    metadata = {"type": "state_summary", "state": row["State"], "total_sales": float(row["total_sales"])}
+    metadata = {
+        "type": "state_summary",
+        "state": row["State"],
+        "total_sales": float(row["total_sales"]),
+    }
     return text, metadata
 
 
@@ -143,7 +147,12 @@ def create_city_text(row: pd.Series) -> tuple[str, dict]:
         f"Total orders {row['total_orders']}, "
         f"Total profit ${row['total_profit']:.2f}."
     )
-    metadata = {"type": "city_summary", "city": row["City"], "state": row["State"], "total_sales": float(row["total_sales"])}
+    metadata = {
+        "type": "city_summary",
+        "city": row["City"],
+        "state": row["State"],
+        "total_sales": float(row["total_sales"]),
+    }
     return text, metadata
 
 
@@ -159,6 +168,56 @@ def create_city_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     )
 
     return [create_city_text(row) for _, row in city_rows.iterrows()]
+
+
+def _format_ranking(names: list[str], values: list[float], label: str, metric: str, n: int, chunk_type: str) -> tuple[str, dict]:
+    lines = ", ".join(f"{i}. {name} ${val:.2f}" for i, (name, val) in enumerate(zip(names, values), 1))
+    text = f"Top {n} {label} by total {metric}: {lines}."
+    return text, {"type": chunk_type}
+
+
+def create_city_ranking_text(
+    top: pd.DataFrame, metric: str, col: str, n: int
+) -> tuple[str, dict]:
+    names = [f"{r['City']}, {r['State']}" for _, r in top.iterrows()]
+    values = [r[col] for _, r in top.iterrows()]
+    return _format_ranking(names, values, "cities", metric, n, "cities_ranking")
+
+
+def create_city_ranking_texts(df: pd.DataFrame, n: int = 10) -> list[tuple[str, dict]]:
+    city_rows = (
+        df.groupby(["City", "State"])
+        .agg(total_sales=("Sales", "sum"), total_profit=("Profit", "sum"))
+        .reset_index()
+    )
+    return [
+        create_city_ranking_text(
+            city_rows.sort_values(col, ascending=False).head(n), metric, col, n
+        )
+        for metric, col in [("sales", "total_sales"), ("profit", "total_profit")]
+    ]
+
+
+def create_state_ranking_text(
+    top: pd.DataFrame, metric: str, col: str, n: int
+) -> tuple[str, dict]:
+    names = [r["State"] for _, r in top.iterrows()]
+    values = [r[col] for _, r in top.iterrows()]
+    return _format_ranking(names, values, "states", metric, n, "states_ranking")
+
+
+def create_state_ranking_texts(df: pd.DataFrame, n: int = 10) -> list[tuple[str, dict]]:
+    state_rows = (
+        df.groupby("State")
+        .agg(total_sales=("Sales", "sum"), total_profit=("Profit", "sum"))
+        .reset_index()
+    )
+    return [
+        create_state_ranking_text(
+            state_rows.sort_values(col, ascending=False).head(n), metric, col, n
+        )
+        for metric, col in [("sales", "total_sales"), ("profit", "total_profit")]
+    ]
 
 
 def create_category_text(row: pd.Series) -> tuple[str, dict]:
@@ -320,6 +379,8 @@ def create_texts(df: pd.DataFrame) -> list[tuple[str, dict]]:
     chunks += create_category_texts(df)
     chunks += create_subcategory_texts(df)
     chunks += create_product_texts(df)
+    chunks += create_city_ranking_texts(df)
+    chunks += create_state_ranking_texts(df)
     return chunks
 
 
