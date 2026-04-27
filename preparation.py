@@ -118,7 +118,7 @@ def create_state_text(row: pd.Series) -> tuple[str, dict]:
         f"Total orders {row['total_orders']}, "
         f"Total profit ${row['total_profit']:.2f}."
     )
-    metadata = {"type": "state_summary", "state": row["State"]}
+    metadata = {"type": "state_summary", "state": row["State"], "total_sales": float(row["total_sales"])}
     return text, metadata
 
 
@@ -143,7 +143,7 @@ def create_city_text(row: pd.Series) -> tuple[str, dict]:
         f"Total orders {row['total_orders']}, "
         f"Total profit ${row['total_profit']:.2f}."
     )
-    metadata = {"type": "city_summary", "city": row["City"], "state": row["State"]}
+    metadata = {"type": "city_summary", "city": row["City"], "state": row["State"], "total_sales": float(row["total_sales"])}
     return text, metadata
 
 
