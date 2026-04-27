@@ -24,6 +24,18 @@ TYPE_KEYWORDS: list[tuple[list[str], list[str]]] = [
 ]
 
 
+TYPE_MAX_CHUNKS: dict[str, int] = {
+    "month_aggregate_summary": 12,
+    "subcategory_summary": 17,
+    "category_summary": 3,
+    "region_summary": 4,
+    "year_summary": 4,
+    "year_category_summary": 12,
+    "state_summary": 50,
+    "city_summary": 30,
+}
+
+
 def extract_types(query: str) -> list[str]:
     q = query.lower()
     result: list[str] = []
@@ -31,6 +43,31 @@ def extract_types(query: str) -> list[str]:
         if any(keyword in q for keyword in keywords):
             result.extend(chunk_types)
     return list(dict.fromkeys(result))
+
+
+RANK_KEYWORDS = [
+    "top",
+    "best",
+    "highest",
+    "most",
+    "lowest",
+    "worst",
+    "least",
+    "rank",
+    "compare",
+]
+
+SORT_KEYWORDS: dict[str, str] = {"sales": "total_sales", "revenue": "total_sales"}
+
+
+def extract_sort_key(query: str) -> str | None:
+    q = query.lower()
+    if not any(keyword in q for keyword in RANK_KEYWORDS):
+        return None
+    for keyword, field in SORT_KEYWORDS.items():
+        if keyword in q:
+            return field
+    return None
 
 
 SYSTEM_PROMPT = """You are a data analyst assistant.
@@ -61,7 +98,18 @@ class RAGPipeline:
     def retrieve(self, query: str) -> list[dict]:
         types = extract_types(query)
         where = {"type": {"$in": types}} if len(types) > 0 else None
-        docs = self._store.search(query, n_results=self._top_k, where=where)
+        top_k = (
+            max(
+                (TYPE_MAX_CHUNKS.get(t, self._top_k) for t in types),
+                default=self._top_k,
+            )
+            if len(types) > 0
+            else self._top_k
+        )
+        docs = self._store.search(query, n_results=top_k, where=where)
+        sort_key = extract_sort_key(query)
+        if sort_key:
+            docs.sort(key=lambda d: d["metadata"].get(sort_key, 0), reverse=True)
         logger.debug(
             f"Retrieved {len(docs)} docs (route={types}), distances: {[round(d['distance'], 3) for d in docs]}"
         )
