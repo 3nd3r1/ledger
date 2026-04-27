@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="docs/images/logo.png" alt="Ledger logo" width="500"/>
+    <img src="docs/images/logo-dark.png" alt="Ledger logo" width="500"/>
 </p>
 <p align="center">
     RAG LLM CLI for querying the Superstore dataset.
